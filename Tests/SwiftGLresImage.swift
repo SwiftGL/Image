@@ -21,7 +21,7 @@
 
 
 import XCTest
-import SwiftGLres
+import SGLImage
 
 
 class SGLImageSimple: XCTestCase {
