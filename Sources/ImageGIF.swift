@@ -269,7 +269,7 @@ final public class SGLImageDecoderGIF : SGLImageDecoder {
                 }
 
                 if (avail & codemask) == 0 && avail <= 0x0FFF {
-                    codesize++
+                    codesize += 1
                     codemask = (1 << codesize) - 1
                 }
                 oldcode = code

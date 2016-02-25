@@ -133,7 +133,11 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
                 }
                 self.chunk_length -= 1
                 return self.loader.readUInt8()
-                }, filter(img)
+                }, {
+                    if self.filter($0) {
+                        self.line(img)
+                    }
+                }
             )
             // discard IDAT checksum
             if (!crushed) {
@@ -218,7 +222,7 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
     }
 
 
-    private func filter<T:SGLImageType>(img:T)(byteImut:UInt8)
+    private func filter(byteImut:UInt8) -> Bool
     {
         var byte = byteImut
         if linePos == 0 {
@@ -231,7 +235,7 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
             for i in 0 ..< filterStride {
                 lineBuf[i] = 0
             }
-            return
+            return false
         }
         switch filter {
         case 0: // none
@@ -276,8 +280,9 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
             }
             linePos = 0
             // successful line
-            line(img)
+            return true
         }
+        return false
     }
 
 
