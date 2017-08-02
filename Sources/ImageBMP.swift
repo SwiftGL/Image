@@ -27,15 +27,15 @@
 
 final public class SGLImageDecoderBMP : SGLImageDecoder {
 
-    override public class func test(l: SGLImageLoader) -> Bool
+    override public class func test(_ l: SGLImageLoader) -> Bool
     {
         if read16be(l) != chars("BM") {
             return false
         }
-        read32le(l) // discard filesize
-        read16le(l) // discard reserved
-        read16le(l) // discard reserved
-        read32le(l) // discard data offset
+        let _ = read32le(l) // discard filesize
+        let _ = read16le(l) // discard reserved
+        let _ = read16le(l) // discard reserved
+        let _ = read32le(l) // discard data offset
         let s = read32le(l)
         return s == 12 || s == 40 || s == 56 || s == 108 || s == 124
     }
@@ -46,7 +46,7 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
         channels = (ma == 0) ? 3 : 4
     }
 
-    override public func load<T:SGLImageType>(img:T)
+    override public func load<T:SGLImageType>(_ img:T)
     {
         if (bpp <= 8) {
             loadPalletized(img)
@@ -77,9 +77,9 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
             return
         }
 
-        read32le() // discard filesize
-        read16le() // discard reserved
-        read16le() // discard reserved
+        let _ = read32le() // discard filesize
+        let _ = read16le() // discard reserved
+        let _ = read16le() // discard reserved
 
         offset = read32le()
         hsize = read32le()
@@ -124,18 +124,18 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
             return
         }
 
-        read32le() // discard sizeof
-        read32le() // discard hres
-        read32le() // discard vres
-        read32le() // discard colorsused
-        read32le() // discard max important
+        let _ = read32le() // discard sizeof
+        let _ = read32le() // discard hres
+        let _ = read32le() // discard vres
+        let _ = read32le() // discard colorsused
+        let _ = read32le() // discard max important
 
         if hsize == 40 || hsize == 56 {
             if (hsize == 56) {
-                read32le()
-                read32le()
-                read32le()
-                read32le()
+                let _ = read32le()
+                let _ = read32le()
+                let _ = read32le()
+                let _ = read32le()
             }
             if bpp == 16 || bpp == 32 {
                 if (compress == 0) {
@@ -173,15 +173,15 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
             mg = read32le()
             mb = read32le()
             ma = read32le()
-            read32le() // discard color space
+            let _ = read32le() // discard color space
             for _ in 0 ..< 12 {
-                read32le() // discard color space parameters
+                let _ = read32le() // discard color space parameters
             }
             if (hsize == 124) {
-                read32le() // discard rendering intent
-                read32le() // discard offset of profile data
-                read32le() // discard size of profile data
-                read32le() // discard reserved
+                let _ = read32le() // discard rendering intent
+                let _ = read32le() // discard offset of profile data
+                let _ = read32le() // discard size of profile data
+                let _ = read32le() // discard reserved
             }
             return // success
         }
@@ -191,7 +191,7 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
     }
 
 
-    func loadPalletized<T:SGLImageType>(img:T)
+    func loadPalletized<T:SGLImageType>(_ img:T)
     {
         let psize:Int
         if hsize == 12 {
@@ -206,7 +206,7 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
         }
 
         var pal:Array<(r:T.Element,g:T.Element,b:T.Element,a:T.Element)> = Array<(r:T.Element,g:T.Element,b:T.Element,a:T.Element)>(
-            count: psize, repeatedValue: (cast(UInt8(0)),cast(UInt8(0)),cast(UInt8(0)),castAlpha(UInt8(255)))
+            repeating: (cast(UInt8(0)),cast(UInt8(0)),cast(UInt8(0)),castAlpha(UInt8(255))), count: psize
         )
 
         for i in 0 ..< psize {
@@ -215,7 +215,7 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
             let r:T.Element = cast(UInt8(read8()))
             pal[i] = (r,g,b,castAlpha(UInt8(255)))
             if hsize != 12 {
-                read8()
+                let _ = read8()
             }
         }
 
@@ -259,7 +259,7 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
     }
 
 
-    func loadDiscrete<T:SGLImageType>(img:T)
+    func loadDiscrete<T:SGLImageType>(_ img:T)
     {
         skip(offset - 14 - hsize)
 
@@ -323,7 +323,7 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
 
 
     // For bit masking, finds the highest bit and the numbers of bits.
-    func shiftCount(m:Int) -> (sh:Int,ct:UInt16)
+    func shiftCount(_ m:Int) -> (sh:Int,ct:UInt16)
     {
         // 64 ensures mask doesn't infinite loop
         if (m == 0) { return (0, 64) }
@@ -356,7 +356,7 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
     // version to avoid upscaling with a rounding error.
     //   11110 -> 11110111 -> 1111011111110111 -> 11110111
     //   11110       ->       1111011110111101 -> 11110111
-    func mask(v:Int, _ mask:Int, _ shiftCount:(sh:Int,ct:UInt16)) -> UInt16
+    func mask(_ v:Int, _ mask:Int, _ shiftCount:(sh:Int,ct:UInt16)) -> UInt16
     {
         let i = UInt16((shiftCount.sh < 0) ?
             (v & mask) << -shiftCount.sh :

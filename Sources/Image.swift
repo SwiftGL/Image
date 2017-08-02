@@ -37,14 +37,12 @@ import Foundation
 // Integers are sRGB and floats are HDR.
 
 public protocol SGLImageType {
-    typealias Element
+    associatedtype Element
     var width:Int {get}
     var height:Int {get}
     var channels:Int {get}
     var rowsize:Int {get}
-    func withUnsafeMutableBufferPointer(
-        @noescape body: (UnsafeMutableBufferPointer<Element>) throws -> Void
-    ) rethrows
+    func withUnsafeMutableBufferPointer(body: (UnsafeMutableBufferPointer<Element>) throws -> Void) rethrows
 }
 
 extension SGLImageType {
@@ -64,7 +62,7 @@ final public class SGLImageRGBA8 : SGLImageType {
         self.channels = 4
         precondition(width > 0 && width < 0xffff)
         precondition(height > 0 && height < 0xffff)
-        array = [(r:UInt8,g:UInt8,b:UInt8,a:UInt8)](count: width*height*channels, repeatedValue: (0,0,0,0))
+        array = [(r:UInt8,g:UInt8,b:UInt8,a:UInt8)](repeating: (0,0,0,0), count: width*height*channels)
     }
 
     public convenience init(_ loader:SGLImageLoader) {
@@ -73,11 +71,13 @@ final public class SGLImageRGBA8 : SGLImageType {
         loader.load(self)
     }
 
-    public func withUnsafeMutableBufferPointer(@noescape body: (UnsafeMutableBufferPointer<UInt8>) throws -> Void) rethrows {
+    public func withUnsafeMutableBufferPointer(body: (UnsafeMutableBufferPointer<UInt8>) throws -> Void) rethrows {
         try array.withUnsafeMutableBufferPointer(){
             // This is unsafe reinterpret cast. Be careful here.
-            let st = UnsafeMutablePointer<UInt8>($0.baseAddress)
-            try body(UnsafeMutableBufferPointer<UInt8>(start: st, count: $0.count*channels))
+            let count = $0.count*channels
+            try $0.baseAddress!.withMemoryRebound(to: UInt8.self, capacity: count) {
+                try body(UnsafeMutableBufferPointer<UInt8>(start: $0, count: count))
+            }
         }
     }
 
@@ -111,15 +111,15 @@ public class SGLImage<T> : SGLImageType {
         precondition(width > 0 && width < 0xffff)
         precondition(height > 0 && height < 0xffff)
         precondition(channels > 0 && channels <= 4)
-        let ptr = UnsafeMutablePointer<T>.alloc(width*height*channels)
+        let ptr = UnsafeMutablePointer<T>.allocate(capacity: width*height*channels)
         buffer = UnsafeMutableBufferPointer<T>(start: ptr, count: width * height * channels)
     }
 
     deinit {
-        buffer.baseAddress.dealloc(buffer.count)
+        buffer.baseAddress!.deallocate(capacity: buffer.count)
     }
 
-    public func withUnsafeMutableBufferPointer(@noescape body: (UnsafeMutableBufferPointer<T>) throws -> Void) rethrows {
+    public func withUnsafeMutableBufferPointer(body: (UnsafeMutableBufferPointer<T>) throws -> Void) rethrows {
         try withExtendedLifetime(self) { try body(buffer) }
     }
 

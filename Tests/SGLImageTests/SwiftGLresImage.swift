@@ -35,4 +35,7 @@ class SGLImageSimple: XCTestCase {
         XCTAssert(loader.error != nil, loader.error ?? "")
     }
 
+    static var allTests = [
+    	("testNoExplode", testNoExplode),
+    ]
 }

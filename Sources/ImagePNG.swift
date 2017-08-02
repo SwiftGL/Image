@@ -27,7 +27,7 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
     // All PNGs start with this sequence
     private static let SIG = [137,80,78,71,13,10,26,10]
 
-    override public class func test(l: SGLImageLoader) -> Bool
+    override public class func test(_ l: SGLImageLoader) -> Bool
     {
         for b in SIG {
             if read8(l) != b { return false }
@@ -65,7 +65,7 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
             // premultiplied alpha (color' = color * alpha / 255)
             crushed = true
             skip(chunk_length)
-            read32be() // discard CRC
+            let _ = read32be() // discard CRC
             chunk_length = read32be()
             chunk_type = read32be()
 
@@ -84,7 +84,7 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
 
 
         while true {
-            read32be() // discard CRC
+            let _ = read32be() // discard CRC
             chunk_length = read32be()
             chunk_type = read32be()
             switch chunk_type {
@@ -116,12 +116,12 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
 
     }
 
-    override public func load<T:SGLImageType>(img:T)
+    override public func load<T:SGLImageType>(_ img:T)
     {
         // discard gzip header bytes
         if (!crushed) {
-            read8() // discard cmf
-            read8() // discard flag
+            let _ = read8() // discard cmf
+            let _ = read8() // discard flag
             chunk_length -= 2
         }
         prepare()
@@ -141,7 +141,7 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
             )
             // discard IDAT checksum
             if (!crushed) {
-                read32be()
+                let _ = read32be()
             }
             // ensure all blocks are good to the end
             // well, some error here with "END?", so skip for now
@@ -183,7 +183,7 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
             nextInterlacedRow()
         } else {
             let bytesWidth = ((filterChannels * xsize * depth) + 7) >> 3
-            lineBuf = [UInt8](count: bytesWidth+filterStride, repeatedValue: 0)
+            lineBuf = [UInt8](repeating: 0, count: bytesWidth+filterStride)
         }
     }
 
@@ -215,14 +215,14 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
             assert(x != 0)
             assert(y != 0)
             let bytesWidth = ((filterChannels * x * depth) + 7) >> 3
-            lineBuf = [UInt8](count: bytesWidth+filterStride, repeatedValue: 0)
+            lineBuf = [UInt8](repeating: 0, count: bytesWidth+filterStride)
         }
         curStart = xorig[curPass]
         curStep = xspc[curPass]
     }
 
 
-    private func filter(byteImut:UInt8) -> Bool
+    private func filter(_ byteImut:UInt8) -> Bool
     {
         var byte = byteImut
         if linePos == 0 {
@@ -286,7 +286,7 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
     }
 
 
-    private func line<T:SGLImageType>(img:T)
+    private func line<T:SGLImageType>(_ img:T)
     {
         // Skip the filter work area
         var i = filterStride
@@ -440,11 +440,11 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
     }
 
 
-    private func nextChunk(type:Int) throws
+    private func nextChunk(_ type:Int) throws
     {
         // Sanity check as we read data to the end
         while true {
-            read32be() // discard chunk checksum
+            let _ = read32be() // discard chunk checksum
             chunk_length = read32be()
             chunk_type = read32be()
             switch chunk_type {
@@ -478,7 +478,7 @@ final public class SGLImageDecoderPNG : SGLImageDecoder {
             if c < 33 || c > 126 {
                 s += "?"
             } else {
-                s += String(Character(UnicodeScalar(c)))
+                s += String(Character(UnicodeScalar(c)!))
             }
         }
         return s

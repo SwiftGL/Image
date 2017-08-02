@@ -29,7 +29,7 @@
 
 final public class SGLImageDecoderGIF : SGLImageDecoder {
 
-    override public class func test(l: SGLImageLoader) -> Bool
+    override public class func test(_ l: SGLImageLoader) -> Bool
     {
         if read32be(l) != chars("GIF8") {
             return false
@@ -72,8 +72,8 @@ final public class SGLImageDecoderGIF : SGLImageDecoder {
         xsize = read16le()
         ysize = read16le()
         flags = read8()
-        read8() // discard background index
-        read8() // discard pixel ratio
+        let _ = read8() // discard background index
+        let _ = read8() // discard pixel ratio
 
         if (flags & 0x80 != 0) {
             loadColorTable(count: 2 << (flags & 7))
@@ -117,7 +117,7 @@ final public class SGLImageDecoderGIF : SGLImageDecoder {
                     let len = read8()
                     if len == 4 {
                         let eflags = read8()
-                        read16le() // discard delay
+                        let _ = read16le() // discard delay
                         transparent = read8()
                         if eflags & 0x01 == 0 {
                             transparent = -1
@@ -142,7 +142,7 @@ final public class SGLImageDecoderGIF : SGLImageDecoder {
     }
 
 
-    override public func load<T:SGLImageType>(img:T)
+    override public func load<T:SGLImageType>(_ img:T)
     {
         var cur_y = 0
         var step = 1
@@ -166,9 +166,7 @@ final public class SGLImageDecoderGIF : SGLImageDecoder {
         codesize = lzw_cs + 1
         codemask = (1 << codesize) - 1
 
-        codes = [(prefix:Int, first:UInt8, suffix:UInt8)](
-            count: 4096, repeatedValue:(0,0,0)
-        )
+        codes = [(prefix:Int, first:UInt8, suffix:UInt8)](repeating:(0,0,0), count: 4096)
 
         for init_code in 0 ..< clear {
             codes[init_code] = (
@@ -199,9 +197,9 @@ final public class SGLImageDecoderGIF : SGLImageDecoder {
     }
 
 
-    private func loadColorTable(count count:Int)
+    private func loadColorTable(count:Int)
     {
-        pal.removeAll(keepCapacity: true)
+        pal.removeAll(keepingCapacity: true)
         pal.reserveCapacity(count)
         for _ in 0 ..< count {
             let r = loader.readUInt8()
