@@ -171,8 +171,8 @@ final public class SGLImageDecoderGIF : SGLImageDecoder {
         for init_code in 0 ..< clear {
             codes[init_code] = (
                 prefix: -1,
-                first: UInt8(truncatingBitPattern:init_code),
-                suffix: UInt8(truncatingBitPattern:init_code)
+                first: UInt8(truncatingIfNeeded:init_code),
+                suffix: UInt8(truncatingIfNeeded:init_code)
             )
         }
 

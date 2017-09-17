@@ -24,13 +24,13 @@
 //        These interfaces will change in the future.
 
 
-public func inflate(_ reader: @escaping (Void) throws -> UInt8, _ writer: @escaping (UInt8) throws -> Void) throws
+public func inflate(_ reader: @escaping () throws -> UInt8, _ writer: @escaping (UInt8) throws -> Void) throws
 {
     let _ = try Inflate(reader, writer)
 }
 
 
-public func inflate(_ reader: @escaping (Void) throws -> UInt8) throws -> Int
+public func inflate(_ reader: @escaping () throws -> UInt8) throws -> Int
 {
     var size = 0
     let _ = try Inflate(reader) { _ in size += 1 }
@@ -76,7 +76,7 @@ private let CodeOrder = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5,
 
 // http://graphics.stanford.edu/~seander/bithacks.html
 private func bitReverse16(_ value:Int) -> Int {
-    var v = UInt16(truncatingBitPattern: value)
+    var v = UInt16(truncatingIfNeeded: value)
     v = ((v & 0xAAAA) >> 1) | ((v & 0x5555) << 1)
     v = ((v & 0xCCCC) >> 2) | ((v & 0x3333) << 2)
     v = ((v & 0xF0F0) >> 4) | ((v & 0x0F0F) << 4)
@@ -87,7 +87,7 @@ private func bitReverse16(_ value:Int) -> Int {
 
 private final class Inflate
 {
-    let readUInt8:(Void) throws -> UInt8
+    let readUInt8:() throws -> UInt8
     let writeUInt8:(UInt8) throws -> Void
 
     var bitsBuffer = 0
@@ -103,7 +103,7 @@ private final class Inflate
     var dynamicLen = Huffman()
     var dynamicDist = Huffman()
 
-    init(_ reader: @escaping (Void) throws -> UInt8, _ writer: @escaping (UInt8) throws -> Void) throws
+    init(_ reader: @escaping () throws -> UInt8, _ writer: @escaping (UInt8) throws -> Void) throws
     {
         self.readUInt8 = reader
         self.writeUInt8 = writer
