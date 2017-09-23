@@ -213,7 +213,11 @@ final public class SGLImageLoader {
     fileprivate func read32be() -> Int {
         var b = [UInt8](repeating: 0, count:4)
         read(&b, maxLength: 4)
-        let i:Int32 = (Int32(b[0])<<24) | (Int32(b[1])<<16) | (Int32(b[2])<<8) | Int32(b[3])
+        let b0 = Int32(b[0])<<24
+        let b1 = Int32(b[1])<<16
+        let b2 = Int32(b[2])<<8
+        let b3 = Int32(b[3])
+        let i:Int32 = (b0 | b1 | b2 | b3)
         return Int(i)
     }
 
@@ -227,7 +231,11 @@ final public class SGLImageLoader {
     fileprivate func read32le() -> Int {
         var b = [UInt8](repeating: 0, count:4)
         read(&b, maxLength: 4)
-        let i:Int32 = (Int32(b[3])<<24) | (Int32(b[2])<<16) | (Int32(b[1])<<8) | Int32(b[0])
+        let b3 = Int32(b[3])<<24
+        let b2 = Int32(b[2])<<16
+        let b1 = Int32(b[1])<<8
+        let b0 = Int32(b[0])
+        let i:Int32 = (b3 | b2 | b1 | b0)
         return Int(i)
     }
 
