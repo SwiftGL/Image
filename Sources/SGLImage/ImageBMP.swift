@@ -276,7 +276,7 @@ final public class SGLImageDecoderBMP : SGLImageDecoder {
         if (bpp == 24) {
             simple = true
         } else if (bpp == 32 && mb == 0xff && mg == 0xff00 &&
-            mr == 0xff0000 && ma == 0xff000000) {
+            mr == 0xff0000 && ma == -16777216) {
                 simple = true
         }
 
