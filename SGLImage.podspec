@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
-  s.name             = 'Image'
-  s.version          = '2.1.0'
+  s.name             = 'SGLImage'
+  s.version          = '2.2.0'
   s.summary          = 'SwiftGL Image Library'
   s.description      = <<-DESC
 The SwiftGL image library allows for platform independent loading of images. Currently BMP, PNG, and GIF are supported.
