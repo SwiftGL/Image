@@ -83,13 +83,13 @@ final public class SGLImageRGBA8 : SGLImageType {
 
     public subscript(x:Int, y:Int) -> (r:UInt8,g:UInt8,b:UInt8,a:UInt8) {
         get {
-            precondition(x > 0 && x < width)
-            precondition(y > 0 && y < height)
+            precondition(x >= 0 && x < width)
+            precondition(y >= 0 && y < height)
             return array[x + y * width]
         }
         set {
-            precondition(x > 0 && x < width)
-            precondition(y > 0 && y < height)
+            precondition(x >= 0 && x < width)
+            precondition(y >= 0 && y < height)
             array[x + y * width] = newValue
         }
     }
@@ -98,7 +98,7 @@ final public class SGLImageRGBA8 : SGLImageType {
 
 
 // Generic image container.
-public class SGLImage<T> : SGLImageType {
+public class SGLImage<T:BinaryInteger> : SGLImageType {
     public let width:Int, height:Int, channels:Int
     private let buffer:UnsafeMutableBufferPointer<T>
 
@@ -125,22 +125,22 @@ public class SGLImage<T> : SGLImageType {
 
     public subscript(x:Int, y:Int, channel:Int) -> T {
         get {
-            precondition(x > 0 && x < width)
-            precondition(y > 0 && y < height)
-            precondition(channel > 0 && channel < channels)
+            precondition(x >= 0 && x < width)
+            precondition(y >= 0 && y < height)
+            precondition(channel >= 0 && channel < channels)
             return buffer[channel + x * channels + y * width * channels]
         }
         set {
-            precondition(x > 0 && x < width)
-            precondition(y > 0 && y < height)
-            precondition(channel > 0 && channel < channels)
+            precondition(x >= 0 && x < width)
+            precondition(y >= 0 && y < height)
+            precondition(channel >= 0 && channel < channels)
             buffer[channel + x * channels + y * width * channels] = newValue
         }
     }
 }
 
 
-final public class SGLImageGreyscale<T> : SGLImage<T> {
+final public class SGLImageGreyscale<T:BinaryInteger> : SGLImage<T> {
     public init(_ loader:SGLImageLoader) {
         precondition(loader.error == nil)
         super.init(
@@ -153,7 +153,7 @@ final public class SGLImageGreyscale<T> : SGLImage<T> {
 }
 
 
-final public class SGLImageGreyAlpha<T> : SGLImage<T> {
+final public class SGLImageGreyAlpha<T:BinaryInteger> : SGLImage<T> {
     public init(_ loader:SGLImageLoader) {
         precondition(loader.error == nil)
         super.init(
@@ -166,7 +166,7 @@ final public class SGLImageGreyAlpha<T> : SGLImage<T> {
 }
 
 
-final public class SGLImageRGB<T> : SGLImage<T> {
+final public class SGLImageRGB<T:BinaryInteger> : SGLImage<T> {
     public init(_ loader:SGLImageLoader) {
         precondition(loader.error == nil)
         super.init(
@@ -179,7 +179,7 @@ final public class SGLImageRGB<T> : SGLImage<T> {
 }
 
 
-final public class SGLImageRGBA<T> : SGLImage<T> {
+final public class SGLImageRGBA<T:BinaryInteger> : SGLImage<T> {
     public init(_ loader:SGLImageLoader) {
         precondition(loader.error == nil)
         super.init(
